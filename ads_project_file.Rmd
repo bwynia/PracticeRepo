@@ -167,8 +167,8 @@ houses_merged$regionidcounty <- as.factor(houses_merged$regionidcounty)
 houses_merged$regionidneighborhood <- as.factor(houses_merged$regionidneighborhood)
 houses_merged$regionidzip <- as.factor(houses_merged$regionidzip)
 
-houses_merged$yardbuildingsqft17 <-as.factor(houses_merged$yardbuildingsqft17)
-houses_merged$yardbuildingsqft26 <-as.factor(houses_merged$yardbuildingsqft26)
+houses_merged$yardbuildingsqft17 <-as.numeric(houses_merged$yardbuildingsqft17)
+houses_merged$yardbuildingsqft26 <-as.numeric(houses_merged$yardbuildingsqft26)
 
 # date variable
 houses_merged$transactiondate <- as.Date(houses_merged$transactiondate)
@@ -211,49 +211,49 @@ for (i in 1:ncol(home_data)) {
 # Run the linear model for all variables, record adjusted r^2
 # did this one by one instead of in a loop because several of the variables only have one level or 1000's of levels
 # I will probably clean this up later and create a separate dataset to use for all the linear models
-r_squared[2] <- summary(lm(logerror ~ home_data[,2],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[3] <- summary(lm(logerror ~ home_data[,2],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[4] <- summary(lm(logerror ~ home_data[,4],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[5] <- summary(lm(logerror ~ home_data[,5],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[6] <- summary(lm(logerror ~ home_data[,6],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[9] <- summary(lm(logerror ~ home_data[,9],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[8] <- summary(lm(logerror ~ home_data[,8],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[11] <- summary(lm(logerror ~ home_data[,11],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[12] <- summary(lm(logerror ~ home_data[,12],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[13] <- summary(lm(logerror ~ home_data[,13],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[14] <- summary(lm(logerror ~ home_data[,14],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[15] <- summary(lm(logerror ~ home_data[,15],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[16] <- summary(lm(logerror ~ home_data[,16],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[17] <- summary(lm(logerror ~ home_data[,17],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[19] <- summary(lm(logerror ~ home_data[,19],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[20] <- summary(lm(logerror ~ home_data[,20],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[21] <- summary(lm(logerror ~ home_data[,21],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[22] <- summary(lm(logerror ~ home_data[,22],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[23] <- summary(lm(logerror ~ home_data[,23],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[24] <- summary(lm(logerror ~ home_data[,24],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[25] <- summary(lm(logerror ~ home_data[,25],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[26] <- summary(lm(logerror ~ home_data[,26],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[27] <- summary(lm(logerror ~ home_data[,27],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[28] <- summary(lm(logerror ~ home_data[,28],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[29] <- summary(lm(logerror ~ home_data[,29],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[33] <- summary(lm(logerror ~ home_data[,33],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[34] <- summary(lm(logerror ~ home_data[,34],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[37] <- summary(lm(logerror ~ home_data[,37],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[38] <- summary(lm(logerror ~ home_data[,38],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[39] <- summary(lm(logerror ~ home_data[,39],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[40] <- summary(lm(logerror ~ home_data[,40],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[41] <- summary(lm(logerror ~ home_data[,41],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[43] <- summary(lm(logerror ~ home_data[,43],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[45] <- summary(lm(logerror ~ home_data[,45],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[46] <- summary(lm(logerror ~ home_data[,46],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[48] <- summary(lm(logerror ~ home_data[,48],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[49] <- summary(lm(logerror ~ home_data[,49],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[50] <- summary(lm(logerror ~ home_data[,50],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[51] <- summary(lm(logerror ~ home_data[,51],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[52] <- summary(lm(logerror ~ home_data[,52],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[53] <- summary(lm(logerror ~ home_data[,53],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[54] <- summary(lm(logerror ~ home_data[,54],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[55] <- summary(lm(logerror ~ home_data[,55],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[2] <- summary(lm(taxvaluedollarcnt ~ home_data[,2],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[3] <- summary(lm(taxvaluedollarcnt ~ home_data[,2],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[4] <- summary(lm(taxvaluedollarcnt ~ home_data[,4],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[5] <- summary(lm(taxvaluedollarcnt ~ home_data[,5],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[6] <- summary(lm(taxvaluedollarcnt ~ home_data[,6],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[9] <- summary(lm(taxvaluedollarcnt ~ home_data[,9],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[8] <- summary(lm(taxvaluedollarcnt ~ home_data[,8],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[11] <- summary(lm(taxvaluedollarcnt ~ home_data[,11],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[12] <- summary(lm(taxvaluedollarcnt ~ home_data[,12],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[13] <- summary(lm(taxvaluedollarcnt ~ home_data[,13],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[14] <- summary(lm(taxvaluedollarcnt ~ home_data[,14],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[15] <- summary(lm(taxvaluedollarcnt ~ home_data[,15],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[16] <- summary(lm(taxvaluedollarcnt ~ home_data[,16],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[17] <- summary(lm(taxvaluedollarcnt ~ home_data[,17],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[19] <- summary(lm(taxvaluedollarcnt ~ home_data[,19],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[20] <- summary(lm(taxvaluedollarcnt ~ home_data[,20],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[21] <- summary(lm(taxvaluedollarcnt ~ home_data[,21],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[22] <- summary(lm(taxvaluedollarcnt ~ home_data[,22],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[23] <- summary(lm(taxvaluedollarcnt ~ home_data[,23],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[24] <- summary(lm(taxvaluedollarcnt ~ home_data[,24],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[25] <- summary(lm(taxvaluedollarcnt ~ home_data[,25],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[26] <- summary(lm(taxvaluedollarcnt ~ home_data[,26],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[27] <- summary(lm(taxvaluedollarcnt ~ home_data[,27],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[28] <- summary(lm(taxvaluedollarcnt ~ home_data[,28],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[29] <- summary(lm(taxvaluedollarcnt ~ home_data[,29],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[33] <- summary(lm(taxvaluedollarcnt ~ home_data[,33],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[34] <- summary(lm(taxvaluedollarcnt ~ home_data[,34],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[37] <- summary(lm(taxvaluedollarcnt ~ home_data[,37],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[38] <- summary(lm(taxvaluedollarcnt ~ home_data[,38],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[39] <- summary(lm(taxvaluedollarcnt ~ home_data[,39],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[40] <- summary(lm(taxvaluedollarcnt ~ home_data[,40],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[41] <- summary(lm(taxvaluedollarcnt ~ home_data[,41],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[43] <- summary(lm(taxvaluedollarcnt ~ home_data[,43],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[45] <- summary(lm(taxvaluedollarcnt ~ home_data[,45],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[46] <- summary(lm(taxvaluedollarcnt ~ home_data[,46],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[48] <- summary(lm(taxvaluedollarcnt ~ home_data[,48],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[49] <- summary(lm(taxvaluedollarcnt ~ home_data[,49],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[50] <- summary(lm(taxvaluedollarcnt ~ home_data[,50],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[51] <- summary(lm(taxvaluedollarcnt ~ home_data[,51],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[52] <- summary(lm(taxvaluedollarcnt ~ home_data[,52],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[53] <- summary(lm(taxvaluedollarcnt ~ home_data[,53],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[54] <- summary(lm(taxvaluedollarcnt ~ home_data[,54],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[55] <- summary(lm(taxvaluedollarcnt ~ home_data[,55],na.action=na.exclude, data = home_data))$adj.r.squared
 
 # Write resulting variables and adjusted r^2 to data frame
 sig_frame <- data.frame(name_vector,r_squared)
@@ -263,7 +263,7 @@ sig_frame <- sig_frame[order(-r_squared),]
 colnames(sig_frame) <- c("Variable Name","Adj. R^2")
 
 # Print 10 most significant variables
-sig_frame[1:15,]
+sig_frame[1:20,]
 
 # Basement size may explain up to 4% of the variation in the log error. 
 
@@ -276,14 +276,13 @@ sig_frame[1:15,]
 
 ```
 
-## Backwise Search Model
+## Multivariable Model
 ```{r}
-# THE NA values are making this break
-#backwise_model <- lm(logerror ~ basementsqft + propertycountylandusecode + finishedsquarefeet12 + calculatedfinishedsquarefeet +  threequarterbathnbr + fireplacecnt + calculatedbathnbr + fullbathcnt + bathroomcnt + garagecarcnt + bedroomcnt,na.action=na.exclude, data = home_data)
-#backwise_step <- stepAIC(backwise_model, direction = "backward", trace = FALSE)
-#backwise_step$anova
-#summary(backwise_step)
-
+# 
+multivariable_model <- lm(taxvaluedollarcnt ~ finishedsquarefeet12 + bathroomcnt + garagecarcnt + bedroomcnt + regionidneighborhood ,na.action=na.exclude, data = home_data)
+multi_r2 <- summary(multivariable_model)$adj.r.squared
+#summary(multivariable_model)
+multi_r2
 
 
 ```
