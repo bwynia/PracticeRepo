@@ -92,20 +92,11 @@ summary(fit)
 
 ```
 
-## Load dependent variable dataset
-```{r}
-# Two data sets. "Properties" has all the independent variables. "Train_logerror" has our dependent variable.
-# Merge data sets using "parcelid"
-
-train_logerror <- read.csv("train_logerror.csv")
-houses_merged <- merge(properties,train_logerror,by="parcelid")
-
-```
 
 ## Set the variable types in R
 ```{r}
 # Determine current type of all variables
-sapply(houses_merged,class)
+sapply(properties,class)
 
 ```
 
@@ -113,151 +104,122 @@ sapply(houses_merged,class)
 # Define Categorical Variables
 
 # Type of Air Conditioning-  Type of cooling system present in the home (if any)
-houses_merged$airconditioningtypeid <- factor(houses_merged$airconditioningtypeid,
+properties$airconditioningtypeid <- factor(properties$airconditioningtypeid,
                                               levels=c(1,2,3,4,5,6,7,8,9,10,11,12,13),
                                               labels=c("Central","Chilled Water","Evaporative Cooler","Geo Thermal","None","Other","Packaged AC Unit","Partial","Refrigeration","Ventilation","Wall Unit","Window Unit","Yes"))
 
-houses_merged$heatingorsystemtypeid <- factor(houses_merged$heatingorsystemtypeid,
+properties$heatingorsystemtypeid <- factor(properties$heatingorsystemtypeid,
                                               levels=c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25),
                                               labels=c("Baseboard","Central","Coal","Convection","Electric","Forced air","Floor/Wall","Gas","Geo Thermal","Gravity","Heat Pump","Hot Water","None","Other","Oil","Partial","Propane","Radiant","Steam","Solar","Space/Suspended","Vent","Wood Burning","Yes","Zone"))
 
 
-houses_merged$propertylandusetypeid<- factor(houses_merged$propertylandusetypeid,                                      levels=c(31,46,47,246,247,248,260,261,262,263,264,265,266,267,268,269,270,271,273,274,275,276,279,290,291),
+properties$propertylandusetypeid<- factor(properties$propertylandusetypeid,                                      levels=c(31,46,47,246,247,248,260,261,262,263,264,265,266,267,268,269,270,271,273,274,275,276,279,290,291),
 labels=c("Commercial/Office/Residential Mixed Used","Multi-Story Store","Store/Office (Mixed Use)","Duplex (2 Units, Any Combination)","Triplex (3 Units, Any Combination)","Quadruplex (4 Units, Any Combination)","Residential General","
 Single Family Residential","Rural Residence","Mobile Home","Townhouse","Cluster Home","Condominium","Cooperative","Row House","
 Planned Unit Development","Residential Common Area","Timeshare","Bungalow","Zero Lot Line","Manufactured, Modular, Prefabricated Homes","Patio Home","Inferred Single Family Residential","Vacant Land - General","Residential Vacant Land"))
 
 
-houses_merged$storytypeid <- factor(houses_merged$storytypeid,                                 levels=c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35),
+properties$storytypeid <- factor(properties$storytypeid,                                 levels=c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35),
 labels=c("Attic & Basement","Attic","Bi-Level with Attic & Basement","Bi-Level","Bi-Level with Attic","Bi-Level with Basement","Basement","Split Entry with Attic & Basement","Split Foyer with Attic & Basement","Level with Attic & Basement","Level with Attic","Level with Basement","Level","Multi-Level with Attic & Basement","Multi-Level","Multi-Level with Attic","Multi-Level with Basement","Split Level with Attic & Basement","Single Level with Attic & Basement","Split Entry with Attic"," Split Entry with Basement","Split Foyer with Attic","Split Foyer with Basement","Single Level with Attic","Single Level with Basement","Single Level","Split Level with Attic","Split Level with Basement","Split Entry","Split Foyer","Split Level","Tri-level with Attic & Basement","Tri-level with Attic","Tri-level with Basement","Tri-level"))
 
-houses_merged$architecturalstyletypeid<- factor(houses_merged$architecturalstyletypeid,                                 levels=c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27),
+properties$architecturalstyletypeid<- factor(properties$architecturalstyletypeid,                                 levels=c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27),
 labels=c("A-Frame","Bungalow","Cape Cod","Cottage","Colonial","Custom","Contemporary","Conventional","Dome","French Provincial","Georgian","High Rise","Historical","Log Cabin/Rustic","Mediterranean","Modern","Mansion","English","Other","Prefab","Ranch/Rambler","Raised Ranch","Spanish","Traditional","Tudor","Unfinished/Under Construction","Victorian"))
 
-houses_merged$typeconstructiontypeid<- factor(houses_merged$typeconstructiontypeid,                                 levels=c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18),
+properties$typeconstructiontypeid<- factor(properties$typeconstructiontypeid,                                 levels=c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18),
 labels=c("Adobe","Brick","Concrete Block","Concrete","Dome","Frame","Heavy","Log","Light","Metal","Manufactured","Mixed","Masonry","Other","Steel","Stone","Tilt-Up","Wood"))
 
 # See Data Dictionary
-houses_merged$buildingclasstypeid<- factor(houses_merged$buildingclasstypeid,                                 levels=c(1,2,3,4,5),
+properties$buildingclasstypeid<- factor(properties$buildingclasstypeid,                                 levels=c(1,2,3,4,5),
 labels=c("Type 1","Type 2","Type 3","Type 4","Type 5"))
 
 ```
 
 ```{r}
 # Define Longitude and Latitude as Numeric
-houses_merged$longitude <- as.numeric(houses_merged$longitude)
-houses_merged$latitude <- as.numeric(houses_merged$latitude)
+properties$longitude <- as.numeric(properties$longitude)
+properties$latitude <- as.numeric(properties$latitude)
 
 # Define deck type ID as categorical
-houses_merged$decktypeid <- as.factor(houses_merged$decktypeid)
+properties$decktypeid <- as.factor(properties$decktypeid)
 
 # Define buildingqualitytypeid as factor
-houses_merged$buildingqualitytypeid <- as.factor(houses_merged$buildingqualitytypeid)
+properties$buildingqualitytypeid <- as.factor(properties$buildingqualitytypeid)
 
 # Define fips as categorical-- we may want to come back and do something with this later with respect to geocoding
-houses_merged$fips <- as.factor(houses_merged$fips)
+properties$fips <- as.factor(properties$fips)
 
 # pool variables as factor 
-houses_merged$pooltypeid10 <-as.factor(houses_merged$pooltypeid10)
-houses_merged$pooltypeid2 <-as.factor(houses_merged$pooltypeid2)
-houses_merged$pooltypeid7 <- as.factor(houses_merged$pooltypeid7)
+properties$pooltypeid10 <-as.factor(properties$pooltypeid10)
+properties$pooltypeid2 <-as.factor(properties$pooltypeid2)
+properties$pooltypeid7 <- as.factor(properties$pooltypeid7)
 
 # census tract and block as factor- may use for geocoding later or grouping as a "neighborhood" variable
-houses_merged$rawcensustractandblock <- as.factor(houses_merged$rawcensustractandblock)
-houses_merged$censustractandblock <- as.factor(houses_merged$censustractandblock)
+properties$rawcensustractandblock <- as.factor(properties$rawcensustractandblock)
+properties$censustractandblock <- as.factor(properties$censustractandblock)
 
 # other geographic variables
-houses_merged$regionidcity <-as.factor(houses_merged$regionidcity)
-houses_merged$regionidcounty <- as.factor(houses_merged$regionidcounty)
-houses_merged$regionidneighborhood <- as.factor(houses_merged$regionidneighborhood)
-houses_merged$regionidzip <- as.factor(houses_merged$regionidzip)
+properties$regionidcity <-as.factor(properties$regionidcity)
+properties$regionidcounty <- as.factor(properties$regionidcounty)
+properties$regionidneighborhood <- as.factor(properties$regionidneighborhood)
+properties$regionidzip <- as.factor(properties$regionidzip)
 
-houses_merged$yardbuildingsqft17 <-as.numeric(houses_merged$yardbuildingsqft17)
-houses_merged$yardbuildingsqft26 <-as.numeric(houses_merged$yardbuildingsqft26)
-
-# date variable
-houses_merged$transactiondate <- as.Date(houses_merged$transactiondate)
+properties$yardbuildingsqft17 <-as.numeric(properties$yardbuildingsqft17)
+properties$yardbuildingsqft26 <-as.numeric(properties$yardbuildingsqft26)
 
 
 ```
-
-```{r}
-# Review type of all variables
-sapply(houses_merged,class)
-
-```
-
-## Create new dataset with dependent variable
-```{r}
-# Creating a new dataset which only includes properties with a known "logerror"
-nrow(train_logerror)
-home_data <- houses_merged[is.na(houses_merged$logerror)==FALSE,]
-nrow(home_data)
-
-# Creating a reasonable subset for testing simple models
-practice_set <- home_data
-
-
-```
-
 
 ## Linear model of dependent as function of independent variables
 ```{r}
 # Which numeric variable does the best job of explaining the variation between Zestimate and Price (logerror)?
-r_squared <- as.vector(rep(0,ncol(home_data)))
-name_vector <- as.vector(rep(NA,ncol(home_data)))
+r_squared <- as.vector(rep(0,ncol(properties)))
+name_vector <- as.vector(rep(NA,ncol(properties)))
 
 # Create a vector with all the variable names
-for (i in 1:ncol(home_data)) {
-  name_vector[i]<- colnames(home_data[i])
+for (i in 1:ncol(properties)) {
+  name_vector[i]<- colnames(properties[i])
 }
 
 # Run the linear model for all variables, record adjusted r^2
 # did this one by one instead of in a loop because several of the variables only have one level or 1000's of levels
 # I will probably clean this up later and create a separate dataset to use for all the linear models
-r_squared[2] <- summary(lm(taxvaluedollarcnt ~ home_data[,2],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[3] <- summary(lm(taxvaluedollarcnt ~ home_data[,2],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[4] <- summary(lm(taxvaluedollarcnt ~ home_data[,4],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[5] <- summary(lm(taxvaluedollarcnt ~ home_data[,5],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[6] <- summary(lm(taxvaluedollarcnt ~ home_data[,6],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[9] <- summary(lm(taxvaluedollarcnt ~ home_data[,9],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[8] <- summary(lm(taxvaluedollarcnt ~ home_data[,8],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[11] <- summary(lm(taxvaluedollarcnt ~ home_data[,11],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[12] <- summary(lm(taxvaluedollarcnt ~ home_data[,12],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[13] <- summary(lm(taxvaluedollarcnt ~ home_data[,13],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[14] <- summary(lm(taxvaluedollarcnt ~ home_data[,14],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[15] <- summary(lm(taxvaluedollarcnt ~ home_data[,15],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[16] <- summary(lm(taxvaluedollarcnt ~ home_data[,16],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[17] <- summary(lm(taxvaluedollarcnt ~ home_data[,17],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[19] <- summary(lm(taxvaluedollarcnt ~ home_data[,19],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[20] <- summary(lm(taxvaluedollarcnt ~ home_data[,20],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[21] <- summary(lm(taxvaluedollarcnt ~ home_data[,21],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[22] <- summary(lm(taxvaluedollarcnt ~ home_data[,22],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[23] <- summary(lm(taxvaluedollarcnt ~ home_data[,23],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[24] <- summary(lm(taxvaluedollarcnt ~ home_data[,24],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[25] <- summary(lm(taxvaluedollarcnt ~ home_data[,25],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[26] <- summary(lm(taxvaluedollarcnt ~ home_data[,26],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[27] <- summary(lm(taxvaluedollarcnt ~ home_data[,27],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[28] <- summary(lm(taxvaluedollarcnt ~ home_data[,28],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[29] <- summary(lm(taxvaluedollarcnt ~ home_data[,29],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[33] <- summary(lm(taxvaluedollarcnt ~ home_data[,33],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[34] <- summary(lm(taxvaluedollarcnt ~ home_data[,34],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[37] <- summary(lm(taxvaluedollarcnt ~ home_data[,37],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[38] <- summary(lm(taxvaluedollarcnt ~ home_data[,38],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[39] <- summary(lm(taxvaluedollarcnt ~ home_data[,39],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[40] <- summary(lm(taxvaluedollarcnt ~ home_data[,40],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[41] <- summary(lm(taxvaluedollarcnt ~ home_data[,41],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[43] <- summary(lm(taxvaluedollarcnt ~ home_data[,43],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[45] <- summary(lm(taxvaluedollarcnt ~ home_data[,45],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[46] <- summary(lm(taxvaluedollarcnt ~ home_data[,46],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[48] <- summary(lm(taxvaluedollarcnt ~ home_data[,48],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[49] <- summary(lm(taxvaluedollarcnt ~ home_data[,49],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[50] <- summary(lm(taxvaluedollarcnt ~ home_data[,50],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[51] <- summary(lm(taxvaluedollarcnt ~ home_data[,51],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[52] <- summary(lm(taxvaluedollarcnt ~ home_data[,52],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[53] <- summary(lm(taxvaluedollarcnt ~ home_data[,53],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[54] <- summary(lm(taxvaluedollarcnt ~ home_data[,54],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared[55] <- summary(lm(taxvaluedollarcnt ~ home_data[,55],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared[2] <- summary(lm(taxvaluedollarcnt ~ properties[,2],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[3] <- summary(lm(taxvaluedollarcnt ~ properties[,2],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[4] <- summary(lm(taxvaluedollarcnt ~ properties[,4],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[5] <- summary(lm(taxvaluedollarcnt ~ properties[,5],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[6] <- summary(lm(taxvaluedollarcnt ~ properties[,6],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[9] <- summary(lm(taxvaluedollarcnt ~ properties[,9],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[8] <- summary(lm(taxvaluedollarcnt ~ properties[,8],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[11] <- summary(lm(taxvaluedollarcnt ~ properties[,11],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[12] <- summary(lm(taxvaluedollarcnt ~ properties[,12],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[13] <- summary(lm(taxvaluedollarcnt ~ properties[,13],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[14] <- summary(lm(taxvaluedollarcnt ~ properties[,14],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[15] <- summary(lm(taxvaluedollarcnt ~ properties[,15],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[16] <- summary(lm(taxvaluedollarcnt ~ properties[,16],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[17] <- summary(lm(taxvaluedollarcnt ~ properties[,17],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[19] <- summary(lm(taxvaluedollarcnt ~ properties[,19],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[20] <- summary(lm(taxvaluedollarcnt ~ properties[,20],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[21] <- summary(lm(taxvaluedollarcnt ~ properties[,21],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[22] <- summary(lm(taxvaluedollarcnt ~ properties[,22],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[23] <- summary(lm(taxvaluedollarcnt ~ properties[,23],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[24] <- summary(lm(taxvaluedollarcnt ~ properties[,24],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[25] <- summary(lm(taxvaluedollarcnt ~ properties[,25],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[26] <- summary(lm(taxvaluedollarcnt ~ properties[,26],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[27] <- summary(lm(taxvaluedollarcnt ~ properties[,27],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[28] <- summary(lm(taxvaluedollarcnt ~ properties[,28],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[29] <- summary(lm(taxvaluedollarcnt ~ properties[,29],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[33] <- summary(lm(taxvaluedollarcnt ~ properties[,33],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[34] <- summary(lm(taxvaluedollarcnt ~ properties[,34],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[37] <- summary(lm(taxvaluedollarcnt ~ properties[,37],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[38] <- summary(lm(taxvaluedollarcnt ~ properties[,38],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[41] <- summary(lm(taxvaluedollarcnt ~ properties[,41],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[43] <- summary(lm(taxvaluedollarcnt ~ properties[,43],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[45] <- summary(lm(taxvaluedollarcnt ~ properties[,45],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[46] <- summary(lm(taxvaluedollarcnt ~ properties[,46],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[48] <- summary(lm(taxvaluedollarcnt ~ properties[,48],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[49] <- summary(lm(taxvaluedollarcnt ~ properties[,49],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[50] <- summary(lm(taxvaluedollarcnt ~ properties[,50],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared[53] <- summary(lm(taxvaluedollarcnt ~ properties[,53],na.action=na.exclude, data = properties))$adj.r.squared
 
 # Write resulting variables and adjusted r^2 to data frame
 sig_frame <- data.frame(name_vector,r_squared)
@@ -276,7 +238,7 @@ sig_frame[1:20,]
 ## Contour Plot
 ```{r}
 
-contour_data <- data.frame(home_data$longitude[1:1000],home_data$latitude[1:1000], home_data$taxvaluedollarcnt[1:1000])
+contour_data <- data.frame(properties$longitude[1:1000],properties$latitude[1:1000], properties$taxvaluedollarcnt[1:1000])
 colnames(contour_data) <- c("Longitude","Latitude","TaxValue")
 contour_data <- na.omit(contour_data)
 contour_data$Longitude <- as.numeric(contour_data$Longitude)
@@ -291,7 +253,7 @@ plot_1
 ## Multivariable Model
 ```{r}
 # 
-multivariable_model <- lm(taxvaluedollarcnt ~ finishedsquarefeet12 + bathroomcnt + garagecarcnt + roomcnt + yearbuilt + regionidcity,na.action=na.exclude, data = home_data)
+multivariable_model <- lm(taxvaluedollarcnt ~ finishedsquarefeet12 + bathroomcnt + garagecarcnt + roomcnt + yearbuilt + regionidcity,na.action=na.exclude, data = properties)
 multi_r2 <- summary(multivariable_model)$adj.r.squared
 #summary(multivariable_model)
 multi_r2
@@ -303,60 +265,60 @@ multi_r2
 ```{r}
 # Land Value
 # Which numeric variable does the best job of explaining the variation between Zestimate and Price (logerror)?
-r_squared2 <- as.vector(rep(0,ncol(home_data)))
-name_vector2 <- as.vector(rep(NA,ncol(home_data)))
+r_squared2 <- as.vector(rep(0,ncol(properties)))
+name_vector2 <- as.vector(rep(NA,ncol(properties)))
 
 # Create a vector with all the variable names
-for (i in 1:ncol(home_data)) {
-  name_vector2[i]<- colnames(home_data[i])
+for (i in 1:ncol(properties)) {
+  name_vector2[i]<- colnames(properties[i])
 }
 
 # Run the linear model for all variables, record adjusted r^2
 # did this one by one instead of in a loop because several of the variables only have one level or 1000's of levels
 # I will probably clean this up later and create a separate dataset to use for all the linear models
-r_squared2[2] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,2],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[3] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,3],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[4] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,4],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[5] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,5],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[6] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,6],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[9] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,9],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[8] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,8],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[11] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,11],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[12] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,12],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[13] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,13],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[14] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,14],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[15] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,15],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[16] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,16],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[17] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,17],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[19] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,19],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[20] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,20],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[21] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,21],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[22] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,22],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[23] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,23],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[24] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,24],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[25] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,25],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[26] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,26],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[27] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,27],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[28] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,28],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[29] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,29],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[33] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,33],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[34] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,34],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[37] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,37],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[38] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,38],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[39] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,39],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[40] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,40],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[41] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,41],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[43] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,43],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[45] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,45],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[46] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,46],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[48] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,48],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[49] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,49],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[50] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,50],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[51] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,51],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[52] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,52],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[53] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,53],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[54] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,54],na.action=na.exclude, data = home_data))$adj.r.squared
-r_squared2[55] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,55],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[2] <- summary(lm(landtaxvaluedollarcnt ~ properties[,2],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[3] <- summary(lm(landtaxvaluedollarcnt ~ properties[,3],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[4] <- summary(lm(landtaxvaluedollarcnt ~ properties[,4],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[5] <- summary(lm(landtaxvaluedollarcnt ~ properties[,5],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[6] <- summary(lm(landtaxvaluedollarcnt ~ properties[,6],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[9] <- summary(lm(landtaxvaluedollarcnt ~ properties[,9],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[8] <- summary(lm(landtaxvaluedollarcnt ~ properties[,8],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[11] <- summary(lm(landtaxvaluedollarcnt ~ properties[,11],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[12] <- summary(lm(landtaxvaluedollarcnt ~ properties[,12],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[13] <- summary(lm(landtaxvaluedollarcnt ~ properties[,13],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[14] <- summary(lm(landtaxvaluedollarcnt ~ properties[,14],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[15] <- summary(lm(landtaxvaluedollarcnt ~ properties[,15],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[16] <- summary(lm(landtaxvaluedollarcnt ~ properties[,16],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[17] <- summary(lm(landtaxvaluedollarcnt ~ properties[,17],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[19] <- summary(lm(landtaxvaluedollarcnt ~ properties[,19],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[20] <- summary(lm(landtaxvaluedollarcnt ~ properties[,20],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[21] <- summary(lm(landtaxvaluedollarcnt ~ properties[,21],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[22] <- summary(lm(landtaxvaluedollarcnt ~ properties[,22],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[23] <- summary(lm(landtaxvaluedollarcnt ~ properties[,23],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[24] <- summary(lm(landtaxvaluedollarcnt ~ properties[,24],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[25] <- summary(lm(landtaxvaluedollarcnt ~ properties[,25],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[26] <- summary(lm(landtaxvaluedollarcnt ~ properties[,26],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[27] <- summary(lm(landtaxvaluedollarcnt ~ properties[,27],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[28] <- summary(lm(landtaxvaluedollarcnt ~ properties[,28],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[29] <- summary(lm(landtaxvaluedollarcnt ~ properties[,29],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[33] <- summary(lm(landtaxvaluedollarcnt ~ properties[,33],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[34] <- summary(lm(landtaxvaluedollarcnt ~ properties[,34],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[37] <- summary(lm(landtaxvaluedollarcnt ~ properties[,37],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[38] <- summary(lm(landtaxvaluedollarcnt ~ properties[,38],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[39] <- summary(lm(landtaxvaluedollarcnt ~ properties[,39],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[40] <- summary(lm(landtaxvaluedollarcnt ~ properties[,40],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[41] <- summary(lm(landtaxvaluedollarcnt ~ properties[,41],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[43] <- summary(lm(landtaxvaluedollarcnt ~ properties[,43],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[45] <- summary(lm(landtaxvaluedollarcnt ~ properties[,45],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[46] <- summary(lm(landtaxvaluedollarcnt ~ properties[,46],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[48] <- summary(lm(landtaxvaluedollarcnt ~ properties[,48],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[49] <- summary(lm(landtaxvaluedollarcnt ~ properties[,49],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[50] <- summary(lm(landtaxvaluedollarcnt ~ properties[,50],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[51] <- summary(lm(landtaxvaluedollarcnt ~ properties[,51],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[52] <- summary(lm(landtaxvaluedollarcnt ~ properties[,52],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[53] <- summary(lm(landtaxvaluedollarcnt ~ properties[,53],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[54] <- summary(lm(landtaxvaluedollarcnt ~ properties[,54],na.action=na.exclude, data = properties))$adj.r.squared
+r_squared2[55] <- summary(lm(landtaxvaluedollarcnt ~ properties[,55],na.action=na.exclude, data = properties))$adj.r.squared
 
 # Write resulting variables and adjusted r^2 to data frame
 sig_frame2 <- data.frame(name_vector,r_squared)
@@ -373,7 +335,7 @@ sig_frame2[1:20,]
 ```
 
 ```{r}
-land_value_model <- lm(landtaxvaluedollarcnt~lotsizesquarefeet + regionidzip, data= home_data)
+land_value_model <- lm(landtaxvaluedollarcnt~lotsizesquarefeet + regionidzip, data= properties[1:100000,])
 summary(land_value_model)$adj.r.squared
 
 
@@ -384,38 +346,54 @@ summary(land_value_model)$adj.r.squared
 ```{r}
 # The output of this code is a data frame. The first column is the PK "Parcel_ID" of the target point. 
 # The next 3 columns are the Parcel_ID's of the next 3 closest points
-nn_dataset <- data.frame(home_data$longitude, home_data$latitude)
-colnames(nn_dataset) <- c("x","y")
-neighbors <- nn2(data=nn_dataset, k=4)[[1]]
+nn_dataset <- data.frame(properties$parcelid, properties$longitude, properties$latitude)
+nn_dataset <- nn_dataset[complete.cases(nn_dataset), ]
+colnames(nn_dataset) <- c("parcelid","x","y")
+neighbors <- nn2(data=nn_dataset[,2:3], k=4)[[1]]
 point <- as.vector(rep(0,nrow(nn_dataset)))
 neighbor_1 <- as.vector(rep(0,nrow(nn_dataset)))
 neighbor_2 <- as.vector(rep(0,nrow(nn_dataset)))
 neighbor_3 <- as.vector(rep(0,nrow(nn_dataset)))
 
 for (i in 1:nrow(neighbors)) {
-  point[i] <- home_data$parcelid[neighbors[i,1]]
-  neighbor_1[i] <- home_data$parcelid[neighbors[i,2]]
-  neighbor_2[i] <- home_data$parcelid[neighbors[i,3]]
-  neighbor_3[i] <- home_data$parcelid[neighbors[i,4]]
+  point[i] <- nn_dataset[i,1]
+  neighbor_1[i] <- properties$parcelid[neighbors[i,2]]
+  neighbor_2[i] <- properties$parcelid[neighbors[i,3]]
+  neighbor_3[i] <- properties$parcelid[neighbors[i,4]]
 }
 neighborhood <- data.frame(point,neighbor_1, neighbor_2, neighbor_3)
-colnames(neighborhood) <- c("Parcel_ID","Neighbor 1","Neighbor 2","Neighbor 3")
+colnames(neighborhood) <- c("parcelid","Neighbor 1","Neighbor 2","Neighbor 3")
 
-# Plotting to verify that nearest neighbors worked with 10 rows of data
-#point_names <- c("1","2","3","4","5","6","7","8","9","10")
-#ggplot(nn_dataset, aes(x = nn_dataset$x,y=nn_dataset$y)) + geom_point() + geom_text(aes(label=point_names), hjust= 1, vjust= 1)
-#neighbors
+```
+
+```{r}
+properties <- merge(properties, neighborhood, by="parcelid")
 ```
 
 ## Nearest Neighbors Land Tax Value Calculation
 
 Hypothesis is that the nearest neighbors will have a similar ratio of tax valuation to property size in square feet. Using this basis, I will calculate the mean ratio of tax assessed value to lot size for the three nearest neighbors, and use that to estimate tax assessed value for the point. I'll then manually calculate the correlation coefficient (R^2) for the model and the actual tax valuation 
 ```{r}
+tax_data <- data.frame(properties$parcelid)
+tax_data$TaxValuePerFT2 <- properties$landtaxvaluedollarcnt/properties$lotsizesquarefeet
+colnames(tax_data) <- c("Neighbor 1","Neighbor1TaxPerFT2")
+properties <- merge(properties,tax_data,by="Neighbor 1")
+colnames(tax_data) <- c("Neighbor 2","Neighbor2TaxPerFT2")
+properties <- merge(properties,tax_data,by="Neighbor 2")
+colnames(tax_data) <- c("Neighbor 3","Neighbor3TaxPerFT2")
+properties <- merge(properties,tax_data,by="Neighbor 3")
+```
 
-tax_data_frame <- data.frame(home_data$parcelid, home_data$lotsizesquarefeet, home_data$landtaxvaluedollarcnt, home_data$landtaxvaluedollarcnt/home_data$lotsizesquarefeet)
-colnames(tax_data_frame) <- c("Parcel","Size","Value","Value/ft2")
-tax_data_frame[1:10,]
+```{r}
+# Compute average property tax rate per square foot from 3 nearest neighbors
+properties$average_land_tax <- (properties$Neighbor1TaxPerFT2 + properties$Neighbor2TaxPerFT2 + properties$Neighbor3TaxPerFT2)/3
 
+# Compute expected tax based on average tax rate of nearest neighbors
+properties$expected_land_tax <- properties$average_land_tax*properties$lotsizesquarefeet
+properties$actual_land_tax <- properties$landtaxvaluedollarcnt
+summary(lm(landtaxvaluedollarcnt~expected_land_tax, data=properties))$adj.r.squared
+
+# THIS IS SURPRISING- THE AVERAGE TAX BURDEN PER SQFT OF LAND VARIES SIGNIFICANTLY BETWEEN NEAREST NEIGHBORS
 
 ```
 
