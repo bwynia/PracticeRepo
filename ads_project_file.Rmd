@@ -23,6 +23,11 @@ library(gplots)
 library(e1071)
 library(stringr)
 library(FNN)
+library(fields)
+library(reshape)
+library(RANN)
+library(sp)
+library(rgeos)
 
 ```
 
@@ -107,7 +112,7 @@ sapply(houses_merged,class)
 ```{r}
 # Define Categorical Variables
 
-# Type of Ait Conditioning-  Type of cooling system present in the home (if any)
+# Type of Air Conditioning-  Type of cooling system present in the home (if any)
 houses_merged$airconditioningtypeid <- factor(houses_merged$airconditioningtypeid,
                                               levels=c(1,2,3,4,5,6,7,8,9,10,11,12,13),
                                               labels=c("Central","Chilled Water","Evaporative Cooler","Geo Thermal","None","Other","Packaged AC Unit","Partial","Refrigeration","Ventilation","Wall Unit","Window Unit","Yes"))
@@ -173,7 +178,6 @@ houses_merged$yardbuildingsqft26 <-as.numeric(houses_merged$yardbuildingsqft26)
 # date variable
 houses_merged$transactiondate <- as.Date(houses_merged$transactiondate)
 
-practice_set[,46]<- as.numeric(practice_set[,46])
 
 ```
 
@@ -197,7 +201,7 @@ practice_set <- home_data
 ```
 
 
-## Linear model of logerror=log(Zestimate)-log(Actual Price) as a function of independent variables
+## Linear model of dependent as function of independent variables
 ```{r}
 # Which numeric variable does the best job of explaining the variation between Zestimate and Price (logerror)?
 r_squared <- as.vector(rep(0,ncol(home_data)))
@@ -269,9 +273,17 @@ sig_frame[1:20,]
 
 ```
 
-## Nearest Neighbors Model
+## Contour Plot
 ```{r}
 
+contour_data <- data.frame(home_data$longitude[1:1000],home_data$latitude[1:1000], home_data$taxvaluedollarcnt[1:1000])
+colnames(contour_data) <- c("Longitude","Latitude","TaxValue")
+contour_data <- na.omit(contour_data)
+contour_data$Longitude <- as.numeric(contour_data$Longitude)
+contour_data$Latitude <- as.numeric(contour_data$Latitude)
+contour_data$TaxValue <- as.numeric(contour_data$TaxValue)
+plot_1 <- ggplot(contour_data, aes(x = Longitude, y = Latitude, z = TaxValue )) + stat_density2d(show.legend=TRUE)
+plot_1
 
 
 ```
@@ -279,7 +291,7 @@ sig_frame[1:20,]
 ## Multivariable Model
 ```{r}
 # 
-multivariable_model <- lm(taxvaluedollarcnt ~ finishedsquarefeet12 + bathroomcnt + garagecarcnt + bedroomcnt + regionidneighborhood ,na.action=na.exclude, data = home_data)
+multivariable_model <- lm(taxvaluedollarcnt ~ finishedsquarefeet12 + bathroomcnt + garagecarcnt + roomcnt + yearbuilt + regionidcity,na.action=na.exclude, data = home_data)
 multi_r2 <- summary(multivariable_model)$adj.r.squared
 #summary(multivariable_model)
 multi_r2
@@ -287,8 +299,127 @@ multi_r2
 
 ```
 
+## Separate Models for Land Value and Structure Value
+```{r}
+# Land Value
+# Which numeric variable does the best job of explaining the variation between Zestimate and Price (logerror)?
+r_squared2 <- as.vector(rep(0,ncol(home_data)))
+name_vector2 <- as.vector(rep(NA,ncol(home_data)))
+
+# Create a vector with all the variable names
+for (i in 1:ncol(home_data)) {
+  name_vector2[i]<- colnames(home_data[i])
+}
+
+# Run the linear model for all variables, record adjusted r^2
+# did this one by one instead of in a loop because several of the variables only have one level or 1000's of levels
+# I will probably clean this up later and create a separate dataset to use for all the linear models
+r_squared2[2] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,2],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[3] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,3],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[4] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,4],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[5] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,5],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[6] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,6],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[9] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,9],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[8] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,8],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[11] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,11],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[12] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,12],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[13] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,13],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[14] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,14],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[15] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,15],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[16] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,16],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[17] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,17],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[19] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,19],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[20] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,20],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[21] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,21],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[22] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,22],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[23] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,23],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[24] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,24],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[25] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,25],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[26] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,26],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[27] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,27],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[28] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,28],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[29] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,29],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[33] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,33],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[34] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,34],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[37] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,37],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[38] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,38],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[39] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,39],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[40] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,40],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[41] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,41],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[43] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,43],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[45] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,45],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[46] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,46],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[48] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,48],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[49] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,49],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[50] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,50],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[51] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,51],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[52] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,52],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[53] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,53],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[54] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,54],na.action=na.exclude, data = home_data))$adj.r.squared
+r_squared2[55] <- summary(lm(landtaxvaluedollarcnt ~ home_data[,55],na.action=na.exclude, data = home_data))$adj.r.squared
+
+# Write resulting variables and adjusted r^2 to data frame
+sig_frame2 <- data.frame(name_vector,r_squared)
+
+# order data frame from most to least significant
+sig_frame2 <- sig_frame2[order(-r_squared),]
+colnames(sig_frame2) <- c("Variable Name","Adj. R^2")
+
+# Print 10 most significant variables
+sig_frame2[1:20,]
+
+
+
+```
+
+```{r}
+land_value_model <- lm(landtaxvaluedollarcnt~lotsizesquarefeet + regionidzip, data= home_data)
+summary(land_value_model)$adj.r.squared
+
+
+```
+
+
+## Nearest Neighbors Optimized Code
+```{r}
+# The output of this code is a data frame. The first column is the PK "Parcel_ID" of the target point. 
+# The next 3 columns are the Parcel_ID's of the next 3 closest points
+nn_dataset <- data.frame(home_data$longitude, home_data$latitude)
+colnames(nn_dataset) <- c("x","y")
+neighbors <- nn2(data=nn_dataset, k=4)[[1]]
+point <- as.vector(rep(0,nrow(nn_dataset)))
+neighbor_1 <- as.vector(rep(0,nrow(nn_dataset)))
+neighbor_2 <- as.vector(rep(0,nrow(nn_dataset)))
+neighbor_3 <- as.vector(rep(0,nrow(nn_dataset)))
+
+for (i in 1:nrow(neighbors)) {
+  point[i] <- home_data$parcelid[neighbors[i,1]]
+  neighbor_1[i] <- home_data$parcelid[neighbors[i,2]]
+  neighbor_2[i] <- home_data$parcelid[neighbors[i,3]]
+  neighbor_3[i] <- home_data$parcelid[neighbors[i,4]]
+}
+neighborhood <- data.frame(point,neighbor_1, neighbor_2, neighbor_3)
+colnames(neighborhood) <- c("Parcel_ID","Neighbor 1","Neighbor 2","Neighbor 3")
+
+# Plotting to verify that nearest neighbors worked with 10 rows of data
+#point_names <- c("1","2","3","4","5","6","7","8","9","10")
+#ggplot(nn_dataset, aes(x = nn_dataset$x,y=nn_dataset$y)) + geom_point() + geom_text(aes(label=point_names), hjust= 1, vjust= 1)
+#neighbors
+```
+
+## Nearest Neighbors Land Tax Value Calculation
+
+Hypothesis is that the nearest neighbors will have a similar ratio of tax valuation to property size in square feet. Using this basis, I will calculate the mean ratio of tax assessed value to lot size for the three nearest neighbors, and use that to estimate tax assessed value for the point. I'll then manually calculate the correlation coefficient (R^2) for the model and the actual tax valuation 
 ```{r}
 
+tax_data_frame <- data.frame(home_data$parcelid, home_data$lotsizesquarefeet, home_data$landtaxvaluedollarcnt, home_data$landtaxvaluedollarcnt/home_data$lotsizesquarefeet)
+colnames(tax_data_frame) <- c("Parcel","Size","Value","Value/ft2")
+tax_data_frame[1:10,]
+
+
+```
+
+```{r}
 
 
 
@@ -298,6 +429,11 @@ multi_r2
 
 
 
+```
+
+```{r}
+
+
 
 ```
 
@@ -305,7 +441,5 @@ multi_r2
 
 
 
-
 ```
-
 
