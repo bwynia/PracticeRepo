@@ -10,6 +10,14 @@ properties <- read.csv("properties_2016.csv")
 
 ```
 
+# Remove faulty tax assess values (less than $1000)
+```{r}
+properties$taxvaluedollarcnt[1:10]
+properties$taxvaluedollarcnt[properties$taxvaluedollarcnt < 1000] <- NA
+properties$taxvaluedollarcnt[1:10]
+
+```
+
 # Build Nearest Neighbors Dataset
 ```{r}
 # New dataset with just the parcelid, longitude, and latitude
@@ -105,4 +113,111 @@ colnames(neighborhood) <- c("parcelid","Neighbor 1","Neighbor 2","Neighbor 3")
 
 ```
 
-neighborhood is the dataset which has each parcelid in column 1 with the parcelid's of the three closest neighbors in columns 1, 2, and 3. We can use it for any queries where we want to test location as a determining factor. 
+Neighborhood is the dataset which has each parcelid in column 1 with the parcelid's of the three closest neighbors in columns 1, 2, and 3. We can use it for any queries where we want to test location as a determining factor.
+
+# Use nearest-neighbors models
+
+```{r}
+# Simple model based on average tax value of 3 nearest neighbors
+
+# Create a data.frame with only the variables used in the multivariable model previously
+df.neighbor.variables <- data.frame(properties$parcelid, properties$taxvaluedollarcnt, properties$finishedsquarefeet12, properties$bathroomcnt, properties$garagecarcnt, properties$roomcnt, properties$yearbuilt, properties$regionidcity)
+colnames(df.neighbor.variables) <- c("parcelid","actual.tax.value","actual.sqft","bathrooms","garages","room.count","year.built","regionidcity")
+
+# Create a data.frame with only the parcel, tax value, and the finished square feet
+df.taxvalue <- data.frame(properties$parcelid, properties$taxvaluedollarcnt, properties$finishedsquarefeet12)
+
+# Eliminate cases with missing values
+df.taxvalue <- df.taxvalue[complete.cases(df.taxvalue), ]
+colnames(df.taxvalue) <- c("Neighbor","taxvalue","sqft")
+
+# Calculate the tax assessed value per square foot for all properties in dataset
+df.taxvalue$sqft.value <- df.taxvalue$taxvalue/df.taxvalue$sqft
+colnames(df.taxvalue) <- c("parcelid","actual.tax.value","actual.sqft","actual.sqft.value")
+# tax dataframe now includes parcel id, the actual tax value, the actual square feet, and the actual value per square foot
+colnames(df.taxvalue) <- c("parcelid","actual.tax.value","actual.sqft","actual.sqft.value")
+
+
+# Create a small subset of the neighbors for testing a nearest neighbors model
+hood1 <- neighborhood
+
+# Merge the tax characteristics (tax value, sqft, and value per square foot) with the neighbors dataset
+# Merged 3 times, one for each neighbor
+# Dataframe now has the parcel, the 3 neighbors parcel id's, and the tax value, sqft, and value per sqft for each neighbor
+hood1 <- merge(hood1,df.taxvalue,by="parcelid")
+colnames(df.taxvalue) <- c("Neighbor 1","taxvalue.nb1","sqft.nb1","sqft.value.nb1")
+hood1 <- merge(hood1,df.taxvalue,by="Neighbor 1")
+colnames(df.taxvalue) <- c("Neighbor 2","taxvalue.nb2","sqft.nb2","sqft.value.nb2")
+hood1 <- merge(hood1,df.taxvalue,by="Neighbor 2")
+colnames(df.taxvalue) <- c("Neighbor 3","taxvalue.nb3","sqft.nb3","sqft.value.nb3")
+hood1 <- merge(hood1,df.taxvalue,by="Neighbor 3")
+
+# Use the average value per square foot for the 3 neighbors to caclulate the sqft.value of the parcel
+hood1$parcel.est.sqft.value <- (hood1$sqft.value.nb1 + hood1$sqft.value.nb2 + hood1$sqft.value.nb3)/3
+
+# Multiply the value per square foot by the square footage of the tarfet parcel
+hood1$parcel.est.value <- hood1$parcel.est.sqft.value*hood1$actual.sqft
+
+# Filter out any cases with missing data
+hood1 <- hood1[complete.cases(hood1),]
+
+# Consolidate the important variables in a new data.frame
+hood.consolidated <- data.frame(hood1$parcelid, hood1$parcel.est.sqft.value, hood1$parcel.est.value)
+colnames(hood.consolidated) <- c("parcelid","parcel.est.sqft.value","parcel.est.value")
+
+# Merge the estimated value with the original property variables (bathrooms, garage, etc.)
+hood.consolidated <- merge(hood.consolidated,df.neighbor.variables, by = "parcelid" )
+colnames(hood.consolidated) <- c("parcelid","parcel.est.sqft.value","parcel.est.value","actual.tax.value","actual.sqft","bathrooms","garages","room.count","year.built","regionidcity")
+
+# Print top 10 rows for familiarization
+#hood.consolidated[1:10,]
+
+```
+
+# Create a multivariable model using the estimated value per quare foot and other data
+
+```{r}
+# Check to make sure the data is relatively complete
+length(which(is.na(hood.consolidated$bathrooms)))
+length(which(is.na(hood.consolidated$garages)))
+length(which(is.na(hood.consolidated$parcel.est.value)))
+
+```
+
+```{r}
+hood_model <- lm(actual.tax.value ~ parcel.est.value + bathrooms + garages + room.count + year.built + regionidcity,na.action=na.exclude, data = hood.consolidated)
+backwise_regression <- stepAIC(hood_model, direction="backward")
+hood_r2 <- summary(backwise_regression)$adj.r.squared
+hood_r2
+
+```
+
+# Just estimated tax value
+```{r}
+summary(lm(actual.tax.value ~ parcel.est.value,na.action=na.exclude, data = hood.consolidated))$adj.r.squared
+
+
+```
+
+# Just tax value and bathrooms
+
+```{r}
+
+summary(lm(actual.tax.value ~ parcel.est.value + bathrooms,na.action=na.exclude, data = hood.consolidated))$adj.r.squared
+
+```
+
+# tav value, bathrooms, and year.built
+
+```{r}
+summary(lm(actual.tax.value ~ parcel.est.value + bathrooms + year.built,na.action=na.exclude, data = hood.consolidated))$adj.r.squared
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
