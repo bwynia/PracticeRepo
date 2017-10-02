@@ -1,0 +1,215 @@
+---
+title: "nearest_neighbors"
+author: "Benjamin S. Wynia"
+date: "September 30, 2017"
+output: html_document
+---
+# Load Data
+```{r}
+properties <- read.csv("properties_2016.csv")
+
+```
+
+# Remove faulty tax assess values (less than $1000)
+```{r}
+properties$taxvaluedollarcnt[1:10]
+properties$taxvaluedollarcnt[properties$taxvaluedollarcnt < 1000] <- NA
+properties$taxvaluedollarcnt[1:10]
+
+```
+
+# Build Nearest Neighbors Dataset
+```{r}
+# New dataset with just the parcelid, longitude, and latitude
+nn_dataset <- data.frame(properties$parcelid, properties$longitude, properties$latitude)
+colnames(nn_dataset) <- c("parcelid","x","y")
+# filter to only include complete cases (should be very few missing one of those variables)
+nn_dataset <- nn_dataset[complete.cases(nn_dataset), ]
+nrow(nn_dataset)
+```
+
+# Calculate Nearest Neighbors (10 point trial run)
+```{r}
+# this uses nn2 and a kd-tree to find nearest neighbors
+neighbors_test <- nn2(data=nn_dataset[1:10,2:3], k=4, treetype ="kd")[[1]]
+colnames(neighbors_test) <- c("Point","Neighbor 1","Neighbor 2","Neighbor 3")
+
+```
+
+# Test plot the trial run of Nearest Neighbors to Confirm 
+
+```{r}
+point_names <- as.vector(neighbors_test[1:10,1])
+
+# Plot the first 10 points
+plot <- ggplot(nn_dataset[1:10,], aes(nn_dataset[1:10,2],nn_dataset[1:10,3])) + geom_point() + geom_text(aes(label=point_names), hjust = 1, vjust = 1)
+plot
+
+# you can individually go through each of the 20 points and check that the algorithm identifies the 3 nearest neighbors
+# I've selected three representative samples below
+neighbors_test[1,]
+neighbors_test[5,]
+neighbors_test[10,]
+
+```
+
+# Test a trial run of the rows to parcelid swapping code
+```{r}
+# create empty vectors to store each parcel id
+point_test <- as.vector(rep(0,nrow(nn_dataset[1:10,])))
+neighbor_1_test  <- as.vector(rep(0,nrow(nn_dataset[1:10,])))
+neighbor_2_test  <- as.vector(rep(0,nrow(nn_dataset[1:10,])))
+neighbor_3_test  <- as.vector(rep(0,nrow(nn_dataset[1:10,])))
+
+# iterate across the dataset, swapping parcelid for row number from the "neighbors" dataset
+for (i in 1:nrow(neighbors_test)) {
+  point_test[i] <- nn_dataset[i,1]
+  neighbor_1_test[i] <- nn_dataset$parcelid[neighbors_test[i,2]]
+  neighbor_2_test[i] <- nn_dataset$parcelid[neighbors_test[i,3]]
+  neighbor_3_test[i] <- nn_dataset$parcelid[neighbors_test[i,4]]
+}
+neighborhood_test <- data.frame(point_test,neighbor_1_test, neighbor_2_test, neighbor_3_test)
+colnames(neighborhood_test) <- c("parcelid","Neighbor 1","Neighbor 2","Neighbor 3")
+neighborhood_test
+```
+
+# Plot the resulting test frame to ensure that neighbors are being correctly tagged with parcel_IDs
+
+```{r}
+point_names2 <- as.vector(neighborhood_test[1:10,1])
+plot2 <- ggplot(nn_dataset[1:10,], aes(nn_dataset[1:10,2],nn_dataset[1:10,3])) + geom_point() + geom_text(aes(label=point_names2), hjust = 1, vjust = 2)
+plot2
+neighborhood_test[4,]
+neighborhood_test[7,]
+```
+
+# Run the Nearest Neighbors algorithm on the entire dataset
+The output of this is a dataframe with four columns. Column 1 is the first row of the nn_dataset, column 2, 3, and 4 are the "row numbers" of the nearest neighbors.
+```{r}
+neighbors <- nn2(data=nn_dataset[,2:3], k=4, treetype ="kd")[[1]]
+colnames(neighbors) <- c("Point","Neighbor 1","Neighbor 2","Neighbor 3")
+nrow(neighbors)
+```
+
+# Swap the row numbers for parcel_ids (Primary key for dataset)
+We have to take the row numbers of the nearest neighbor, and plug that back into the original dataset to get the parcelid. This takes a couple minutes to run, and there is probably a better method than a "for" loop.
+
+```{r}
+
+# create empty vectors to store each parcel id
+point <- as.vector(rep(0,nrow(nn_dataset)))
+neighbor_1 <- as.vector(rep(0,nrow(nn_dataset)))
+neighbor_2 <- as.vector(rep(0,nrow(nn_dataset)))
+neighbor_3 <- as.vector(rep(0,nrow(nn_dataset)))
+
+# iterate across the dataset, swapping parcelid for row number from the "neighbors" dataset
+for (i in 1:nrow(neighbors)) {
+  point[i] <- nn_dataset[i,1]
+  neighbor_1[i] <- nn_dataset$parcelid[neighbors[i,2]]
+  neighbor_2[i] <- nn_dataset$parcelid[neighbors[i,3]]
+  neighbor_3[i] <- nn_dataset$parcelid[neighbors[i,4]]
+}
+neighborhood <- data.frame(point,neighbor_1, neighbor_2, neighbor_3)
+colnames(neighborhood) <- c("parcelid","Neighbor 1","Neighbor 2","Neighbor 3")
+
+```
+
+Neighborhood is the dataset which has each parcelid in column 1 with the parcelid's of the three closest neighbors in columns 1, 2, and 3. We can use it for any queries where we want to test location as a determining factor.
+
+# Use nearest-neighbors models
+
+```{r}
+# Simple model based on average tax value of 3 nearest neighbors
+
+# Create a data.frame with only the variables used in the multivariable model previously
+df.neighbor.variables <- data.frame(properties$parcelid, properties$taxvaluedollarcnt, properties$finishedsquarefeet12, properties$bathroomcnt, properties$garagecarcnt, properties$roomcnt, properties$yearbuilt, properties$regionidcity)
+colnames(df.neighbor.variables) <- c("parcelid","actual.tax.value","actual.sqft","bathrooms","garages","room.count","year.built","regionidcity")
+
+# Create a data.frame with only the parcel, tax value, and the finished square feet
+df.taxvalue <- data.frame(properties$parcelid, properties$taxvaluedollarcnt, properties$finishedsquarefeet12)
+
+# Eliminate cases with missing values
+df.taxvalue <- df.taxvalue[complete.cases(df.taxvalue), ]
+colnames(df.taxvalue) <- c("Neighbor","taxvalue","sqft")
+
+# Calculate the tax assessed value per square foot for all properties in dataset
+df.taxvalue$sqft.value <- df.taxvalue$taxvalue/df.taxvalue$sqft
+colnames(df.taxvalue) <- c("parcelid","actual.tax.value","actual.sqft","actual.sqft.value")
+# tax dataframe now includes parcel id, the actual tax value, the actual square feet, and the actual value per square foot
+colnames(df.taxvalue) <- c("parcelid","actual.tax.value","actual.sqft","actual.sqft.value")
+
+
+# Create a small subset of the neighbors for testing a nearest neighbors model
+hood1 <- neighborhood
+
+# Merge the tax characteristics (tax value, sqft, and value per square foot) with the neighbors dataset
+# Merged 3 times, one for each neighbor
+# Dataframe now has the parcel, the 3 neighbors parcel id's, and the tax value, sqft, and value per sqft for each neighbor
+hood1 <- merge(hood1,df.taxvalue,by="parcelid")
+colnames(df.taxvalue) <- c("Neighbor 1","taxvalue.nb1","sqft.nb1","sqft.value.nb1")
+hood1 <- merge(hood1,df.taxvalue,by="Neighbor 1")
+colnames(df.taxvalue) <- c("Neighbor 2","taxvalue.nb2","sqft.nb2","sqft.value.nb2")
+hood1 <- merge(hood1,df.taxvalue,by="Neighbor 2")
+colnames(df.taxvalue) <- c("Neighbor 3","taxvalue.nb3","sqft.nb3","sqft.value.nb3")
+hood1 <- merge(hood1,df.taxvalue,by="Neighbor 3")
+
+# Use the average value per square foot for the 3 neighbors to caclulate the sqft.value of the parcel
+hood1$parcel.est.sqft.value <- (hood1$sqft.value.nb1 + hood1$sqft.value.nb2 + hood1$sqft.value.nb3)/3
+
+# Multiply the value per square foot by the square footage of the tarfet parcel
+hood1$parcel.est.value <- hood1$parcel.est.sqft.value*hood1$actual.sqft
+
+# Filter out any cases with missing data
+hood1 <- hood1[complete.cases(hood1),]
+
+# Consolidate the important variables in a new data.frame
+hood.consolidated <- data.frame(hood1$parcelid, hood1$parcel.est.sqft.value, hood1$parcel.est.value)
+colnames(hood.consolidated) <- c("parcelid","parcel.est.sqft.value","parcel.est.value")
+
+# Merge the estimated value with the original property variables (bathrooms, garage, etc.)
+hood.consolidated <- merge(hood.consolidated,df.neighbor.variables, by = "parcelid" )
+colnames(hood.consolidated) <- c("parcelid","parcel.est.sqft.value","parcel.est.value","actual.tax.value","actual.sqft","bathrooms","garages","room.count","year.built","regionidcity")
+
+# Print top 10 rows for familiarization
+#hood.consolidated[1:10,]
+
+```
+
+# Create a multivariable model using the estimated value per quare foot and other data
+
+```{r}
+# Check to make sure the data is relatively complete
+length(which(is.na(hood.consolidated$bathrooms)))
+length(which(is.na(hood.consolidated$garages)))
+length(which(is.na(hood.consolidated$parcel.est.value)))
+
+```
+
+## Backwards variable selection method of model building
+```{r}
+hood_model <- lm(actual.tax.value ~ parcel.est.value + bathrooms + garages + room.count + year.built + regionidcity,na.action=na.exclude, data = hood.consolidated)
+backwise_regression <- stepAIC(hood_model, direction="backward")
+hood_r2 <- summary(backwise_regression)$adj.r.squared
+hood_r2
+
+```
+
+## Multivariable Model
+```{r}
+# 
+multivariable_model <- lm(taxvaluedollarcnt ~ finishedsquarefeet12 + bathroomcnt + garagecarcnt + roomcnt + yearbuilt + regionidcity,na.action=na.exclude, data = properties)
+multi_r2 <- summary(multivariable_model)$adj.r.squared
+#summary(multivariable_model)
+multi_r2
+
+# not sure why the R^2 dropped, maybe just because now I'm using full dataset, but R^2 came to 45.7%. 
+```
+
+
+```{r}
+
+```
+
+```{r}
+
+```
