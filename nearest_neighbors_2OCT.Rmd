@@ -1,0 +1,58 @@
+---
+title: "nearest_neighbors_2OCT"
+author: "Benjamin S. Wynia"
+date: "October 2, 2017"
+output: html_document
+---
+
+
+```{r}
+properties <- read.csv("properties_2016.csv")
+
+```
+
+```{r}
+properties$taxvaluedollarcnt[properties$taxvaluedollarcnt < 1000] <- NA
+
+nn_dataset <- data.frame(properties$parcelid, properties$longitude, properties$latitude, properties$taxvaluedollarcnt)
+colnames(nn_dataset) <- c("parcelid","x","y","taxvalue")
+
+# filter to only include complete cases (should be very few missing one of those variables)
+nn_dataset <- nn_dataset[complete.cases(nn_dataset), ]
+nrow(nn_dataset)
+
+# Finding the neighbors
+neighbors <- nn2(data=nn_dataset[,2:3], k=4, treetype ="kd")[[1]]
+colnames(neighbors) <- c("Point","Neighbor 1","Neighbor 2","Neighbor 3")
+nrow(neighbors)
+
+# create empty vectors to store each parcel id
+point <- as.vector(rep(0,nrow(nn_dataset)))
+neighbor_1 <- as.vector(rep(0,nrow(nn_dataset)))
+neighbor_2 <- as.vector(rep(0,nrow(nn_dataset)))
+neighbor_3 <- as.vector(rep(0,nrow(nn_dataset)))
+
+# iterate across the dataset, swapping parcelid for row number from the "neighbors" dataset
+for (i in 1:nrow(neighbors)) {
+  point[i] <- nn_dataset[i,1]
+  neighbor_1[i] <- nn_dataset$taxvalue[neighbors[i,2]]
+  neighbor_2[i] <- nn_dataset$taxvalue[neighbors[i,3]]
+  neighbor_3[i] <- nn_dataset$taxvalue[neighbors[i,4]]
+}
+neighborhood <- data.frame(point,neighbor_1, neighbor_2, neighbor_3)
+colnames(neighborhood) <- c("parcelid","Neighbor 1 Tax Value","Neighbor 2 Tax Value","Neighbor 3 Tax Value")
+neighborhood$est.tax.value <- (neighborhood$`Neighbor 1 Tax Value`+neighborhood$`Neighbor 2 Tax Value`+neighborhood$`Neighbor 3 Tax Value`)/3
+colnames(neighborhood) <- c("parcelid","Neighbor 1 Tax Value","Neighbor 2 Tax Value","Neighbor 3 Tax Value","EstTaxValue")
+model_dataset <- merge(neighborhood,nn_dataset,by="parcelid")
+summary(lm(taxvalue ~ EstTaxValue, data = model_dataset))$adj.r.squared
+combined_dataset <- merge(properties,model_dataset,by="parcelid")
+multivariable_model <- lm(taxvalue ~ EstTaxValue + bathroomcnt + yearbuilt + bedroomcnt + calculatedfinishedsquarefeet + lotsizesquarefeet + hashottuborspa + propertylandusetypeid + buildingqualitytypeid + heatingorsystemtypeid,na.action=na.exclude, data = combined_dataset)
+backwise_regression <- stepAIC(multivariable_model, direction="backward")
+multi_r2 <- summary(backwise_regression)$adj.r.squared
+multi_r2
+
+
+
+```
+The R^2 for this multivariable model with nearest neighbors value estimate is `R multi_r2`.
+
